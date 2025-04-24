@@ -1,0 +1,30 @@
+LAST DEPLOYED: Fri Jul  3 01:41:29 2020
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed via port 5432 on the following DNS name from within your cluster:
+
+    fbs-db-postgresql.default.svc.cluster.local - Read/Write connection
+    fbs-db-postgresql-read.default.svc.cluster.local - Read only connection
+
+To get the password for "postgres" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace default fbs-db-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+
+To connect to your database run the following command:
+
+    kubectl run fbs-db-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:11.8.0-debian-10-r51 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host fbs-db-postgresql -U postgres -d fbs -p 5432
+
+
+
+To connect to your database from outside the cluster execute the following commands:
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        Watch the status with: 'kubectl get svc --namespace default -w fbs-db-postgresql'
+
+    export SERVICE_IP=$(kubectl get svc --namespace default fbs-db-postgresql --template "{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}")
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host $SERVICE_IP --port 5432 -U postgres -d fbs

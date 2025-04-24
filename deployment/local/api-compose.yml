@@ -1,0 +1,11 @@
+version: '3'
+services:
+  api:
+    build: ../../api
+    ports:
+      - "80:80"
+    environment:
+      - FBS_DATABASE_POSTGRESQL_SERVICE_HOST=postgresdb:5432
+      - RABBITMQ_SERVICE_SERVICE_HOST=queue:5672
+    volumes:
+      - ../../api/app:/app

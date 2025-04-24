@@ -1,0 +1,19 @@
+version: '3'
+services:
+  queue:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  postgresdb:
+    image: postgres:alpine
+    container_name: postgresdb
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: yah7WUy1Oi8G
+      POSTGRES_USER: fbs
+      POSTGRES_DB: fbs
+    volumes:
+      - "./pgdata:/var/lib/postgresql/data"

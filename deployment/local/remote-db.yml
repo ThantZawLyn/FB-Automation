@@ -1,0 +1,35 @@
+version: '3'
+services:
+  queue:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  api:
+    image: rannovr/fb_api:latest
+    ports:
+      - "80:80"
+    environment:
+      - FBS_DATABASE_POSTGRESQL_SERVICE_HOST=postgresql://fbs:yah7WUy1Oi8G@172.32.253.129:5432/fbs
+      - FBS_DATABASE_POSTGRESQL_SLAVE_SERVICE_HOST=postgresql://fbs:yah7WUy1Oi8G@172.32.253.129:5432/fbs
+      - RABBITMQ_SERVICE_SERVICE_HOST=queue:5672
+    depends_on:
+      - "queue"
+  producer:
+    image: rannovr/fb_producer:latest
+    environment:
+      - FBS_DATABASE_POSTGRESQL_SERVICE_HOST=postgresql://fbs:yah7WUy1Oi8G@172.32.253.129:5432/fbs
+      - RABBITMQ_SERVICE_SERVICE_HOST=queue:5672
+    depends_on:
+      - "queue"
+  worker:
+    image: rannovr/fb_worker:latest
+    environment:
+      - FBS_DATABASE_POSTGRESQL_SERVICE_HOST=postgresql://fbs:yah7WUy1Oi8G@172.32.253.129:5432/fbs
+      - RABBITMQ_SERVICE_SERVICE_HOST=queue:5672
+    depends_on:
+      - "queue"
+    command: bash -c "nohup node ./proxy/proxy.js > ./proxy/log & /usr/local/bin/celery -A app worker --loglevel=info --concurrency=1 --max-tasks-per-child=1"
+    deploy:
+      mode: replicated
+      replicas: 2
